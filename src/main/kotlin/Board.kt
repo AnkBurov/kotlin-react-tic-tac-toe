@@ -6,7 +6,7 @@ class Board : RComponent<RProps, BoardState>() {
     override fun componentWillMount() {
         setState {
             squares = arrayOfNulls(9)
-            xIsNext = true
+            nextPlayer = Player.X
         }
     }
 
@@ -36,8 +36,8 @@ class Board : RComponent<RProps, BoardState>() {
             val winner = calculateWinner(squares)
 
             val status = when (winner) {
-                "X", "O" -> "Winner: $winner"
-                else -> "Next player: " + if (xIsNext) "X" else "O"
+                Player.X, Player.O -> "Winner: $winner"
+                else -> "Next player: $nextPlayer"
             }
             return status
         }
@@ -48,14 +48,17 @@ class Board : RComponent<RProps, BoardState>() {
             return
         }
         val updatedSquares = state.squares.copyOf()
-        updatedSquares[i] = if (state.xIsNext) "X" else "O"
+        updatedSquares[i] = state.nextPlayer
         setState {
             squares = updatedSquares
-            xIsNext = !xIsNext
+            nextPlayer = when (nextPlayer) {
+                Player.X -> Player.O
+                Player.O -> Player.X
+            }
         }
     }
 
-    private fun calculateWinner(squares: Array<String?>): String? {
+    private fun calculateWinner(squares: Array<Player?>): Player? {
         for ((a, b, c) in lines) {
             if (squares[a] == squares[b] && squares[a] == squares[c]) {
                 return squares[a]
@@ -78,7 +81,7 @@ class Board : RComponent<RProps, BoardState>() {
     }
 }
 
-class BoardState(var squares: Array<String?>,
-                 var xIsNext: Boolean) : RState
+class BoardState(var squares: Array<Player?>,
+                 var nextPlayer: Player) : RState
 
 fun RBuilder.board() = child(Board::class) {}

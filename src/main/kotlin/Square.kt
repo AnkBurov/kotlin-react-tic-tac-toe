@@ -3,9 +3,9 @@ import org.w3c.dom.events.Event
 import react.*
 import react.dom.button
 
-fun RBuilder.square(value: String?, onClickFunction: (Event) -> Unit) {
+fun RBuilder.square(player: Player?, onClickFunction: (Event) -> Unit) {
     button(classes = "square") {
-        +(value ?: "")
+        +(player?.name ?: "")
         attrs.onClickFunction = onClickFunction
     }
 }

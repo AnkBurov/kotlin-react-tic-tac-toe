@@ -42,7 +42,7 @@ kotlin {
 
 compileKotlin2Js {
     kotlinOptions {
-        moduleKind = 'commonjs'
+        moduleKind = 'umd'
     }
 }
 
