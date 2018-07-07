@@ -10,12 +10,18 @@ import react.dom.div
 import react.dom.li
 import react.dom.ol
 
-class Game : RComponent<RProps, GameState>() {
+class Game : RComponent<GameProps, GameState>() {
 
     override fun componentWillMount() {
         setState {
-            history = mutableListOf(HistoryState())
+            val board = BoardModel(props.fieldSize, props.victoryLength)
+            history = mutableListOf(HistoryState(board))
         }
+    }
+
+    override fun componentWillReceiveProps(nextProps: GameProps) {
+        val board = BoardModel(nextProps.fieldSize, nextProps.victoryLength)
+        state.history = mutableListOf(HistoryState(board))
     }
 
     override fun RBuilder.render() {
@@ -84,15 +90,20 @@ class Game : RComponent<RProps, GameState>() {
         newBoard.setCell(row, column, currentPlayer)
 
         setState {
-            val newState = HistoryState(currentPlayer.other(), newBoard)
+            val newState = HistoryState(newBoard, currentPlayer.other())
             history += newState
         }
     }
 }
 
+class GameProps(var fieldSize: Int, var victoryLength: Int) : RProps
+
 class GameState(var history: List<HistoryState>) : RState
 
-class HistoryState(var nextPlayer: Player = X,
-                      var board: BoardModel = BoardModel(3))
+class HistoryState(var board: BoardModel,
+                   var nextPlayer: Player = X)
 
-fun RBuilder.game() = child(Game::class) {}
+fun RBuilder.game(fieldSize: Int, victoryLength: Int) = child(Game::class) {
+    attrs.fieldSize = fieldSize
+    attrs.victoryLength = victoryLength
+}
