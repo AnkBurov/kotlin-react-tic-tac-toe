@@ -1,4 +1,5 @@
 import kotlinx.html.js.onClickFunction
+import model.Player
 import org.w3c.dom.events.Event
 import react.*
 import react.dom.button
