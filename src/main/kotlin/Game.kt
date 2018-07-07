@@ -1,5 +1,8 @@
 import kotlinx.html.js.onClickFunction
+import model.BoardModel
 import model.Player
+import model.Player.*
+import model.isPlayer
 import org.w3c.dom.events.Event
 import react.*
 import react.dom.button
@@ -11,7 +14,7 @@ class Game : RComponent<RProps, GameState>() {
 
     override fun componentWillMount() {
         setState {
-            history = mutableListOf(HistoryState(arrayOfNulls(9), Player.X))
+            history = mutableListOf(HistoryState())
         }
     }
 
@@ -19,8 +22,9 @@ class Game : RComponent<RProps, GameState>() {
 
         div("game") {
             div("game-board") {
-                board(state.history.last().squares) {i -> {
-                        handleClick(i)
+                board(state.history.last().board) { row, column ->
+                    {
+                        handleClick(row, column)
                     }
                 }
             }
@@ -57,62 +61,38 @@ class Game : RComponent<RProps, GameState>() {
     }
 
     private fun getStatus(gameState: GameState): String {
-        with(gameState) {
-            val current = history.last()
+        val current = gameState.history.last()
 
-            val winner = calculateWinner(current.squares)
+        val winner = current.board.calculateWinner()
 
-            val status = when (winner) {
-                Player.X, Player.O -> "Winner: $winner"
-                else -> "Next player: ${current.nextPlayer}"
-            }
-            return status
+        return when {
+            winner.isPlayer() -> "Winner: $winner"
+            current.board.isFull() -> "Draw"
+            else -> "Next player: ${current.nextPlayer}"
         }
     }
 
-    private fun calculateWinner(squares: Array<Player?>): Player? {
-        for ((a, b, c) in lines) {
-            if (squares[a] == squares[b] && squares[a] == squares[c]) {
-                return squares[a]
-            }
-        }
-        return null
-    }
-
-    private fun handleClick(i: Int) {
+    private fun handleClick(row: Int, column: Int) {
         val current = state.history.last()
+        val currentPlayer = current.nextPlayer
 
-        if (calculateWinner(current.squares) != null || current.squares[i] != null) {
+        if (current.board.calculateWinner() != null || current.board.getCell(row, column) != null) {
             return
         }
-        val updatedSquares = current.squares.copyOf()
-        updatedSquares[i] = current.nextPlayer
-        setState {
-            val newState = HistoryState(updatedSquares, when (current.nextPlayer) {
-                Player.X -> Player.O
-                Player.O -> Player.X
-            })
-            history = ArrayList(history + newState)
-        }
-    }
 
-    companion object {
-        private val lines = listOf(
-                Triple(0, 1, 2),
-                Triple(3, 4, 5),
-                Triple(6, 7, 8),
-                Triple(0, 3, 6),
-                Triple(1, 4, 7),
-                Triple(2, 5, 8),
-                Triple(0, 4, 8),
-                Triple(2, 4, 6)
-        )
+        val newBoard = current.board.copyOf()
+        newBoard.setCell(row, column, currentPlayer)
+
+        setState {
+            val newState = HistoryState(currentPlayer.other(), newBoard)
+            history += newState
+        }
     }
 }
 
 class GameState(var history: List<HistoryState>) : RState
 
-class HistoryState(var squares: Array<Player?>,
-                   var nextPlayer: Player)
+class HistoryState(var nextPlayer: Player = X,
+                      var board: BoardModel = BoardModel(3))
 
 fun RBuilder.game() = child(Game::class) {}

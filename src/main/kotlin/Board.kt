@@ -1,21 +1,21 @@
-import model.Player
+import model.BoardModel
 import org.w3c.dom.events.Event
 import react.*
 import react.dom.div
 
-fun RBuilder.board(squares: Array<Player?>, onClickFunction: (Int) -> (Event) -> Unit) {
-
+fun RBuilder.board(board: BoardModel, onClickFunction: (Int, Int) -> (Event) -> Unit) {
     div {
-        for (i in 0..8 step 3) {
+        for (row in 0 until board.size) {
             div("board-row") {
-                for (j in i..i + 2) {
-                    renderSquare(j, squares, onClickFunction)
+                for (column in 0 until board.size) {
+                    renderSquare(row, column, board, onClickFunction)
                 }
             }
         }
     }
 }
 
-private fun RBuilder.renderSquare(index: Int, squares: Array<Player?>, onClickFunction: (Int) -> (Event) -> Unit) {
-    square(squares[index], onClickFunction(index))
+private fun RBuilder.renderSquare(row: Int, column: Int, board: BoardModel,
+                                  onClickFunction: (Int, Int) -> (Event) -> Unit) {
+    square(board.getCell(row, column), onClickFunction(row, column))
 }

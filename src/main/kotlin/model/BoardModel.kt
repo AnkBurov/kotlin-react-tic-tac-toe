@@ -3,7 +3,7 @@ package model
 import model.Player.O
 import model.Player.X
 
-data class BoardModel(private val size: Int,
+data class BoardModel(val size: Int,
                       private val victoryLength: Int = 3,
                       private val rows: List<Row> = arrayOfNulls<Row>(size)
                               .map { arrayOfNulls<Player?>(size).toMutableList() }
@@ -45,6 +45,11 @@ data class BoardModel(private val size: Int,
             newRows += newRow
         }
         return BoardModel(size, victoryLength, newRows)
+    }
+
+    fun isFull(): Boolean {
+        return rows.filter { it.all { it != null } }
+                .size == rows.size
     }
 
     private fun checkRight(rowIndex: Int,
@@ -103,7 +108,7 @@ data class BoardModel(private val size: Int,
                                    columnIndex: Int,
                                    xCounter: Int = 0,
                                    oCounter: Int = 0,
-                                   whichLineChecker: (Player?) -> Player?) : Player? {
+                                   whichLineChecker: (Player?) -> Player?): Player? {
         if (xCounter >= victoryLength) {
             return X
         } else if (oCounter >= victoryLength) {
@@ -117,28 +122,6 @@ data class BoardModel(private val size: Int,
         val cell = rows[rowIndex][columnIndex]
         return whichLineChecker(cell)
     }
-
-    /*private fun checkMiddleRightForWinner(rowIndex: Int,
-                                          columnIndex: Int,
-                                          xCounter: Int = 0,
-                                          oCounter: Int = 0) : Player? {
-        if (xCounter > victoryLength) {
-            return X
-        } else if (oCounter > victoryLength) {
-            return O
-        }
-
-        if (rowIndex > rows.size - 1 || columnIndex > rows[rowIndex].size - 1) {
-            return null//out of bounds
-        }
-
-        val cell = rows[rowIndex][columnIndex]
-        return when (cell) {
-            X -> checkMiddleRightForWinner(rowIndex + 1, columnIndex, xCounter + 1, oCounter)
-            O -> checkMiddleRightForWinner(rowIndex + 1, columnIndex, xCounter, oCounter + 1)
-            else -> null
-        }
-    }*/
 }
 
 typealias Row = MutableList<Player?>
