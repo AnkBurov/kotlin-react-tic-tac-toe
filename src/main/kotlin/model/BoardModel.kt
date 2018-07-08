@@ -18,6 +18,10 @@ data class BoardModel(val size: Int,
         }
     }
 
+    fun emptyCell(row: Int, column: Int) {
+        rows[row][column] = null
+    }
+
     fun getCell(row: Int, column: Int) = rows[row][column]
 
     fun calculateWinner(): Player? {
@@ -48,8 +52,18 @@ data class BoardModel(val size: Int,
     }
 
     fun isFull(): Boolean {
-        return rows.filter { it.all { it != null } }
-                .size == rows.size
+        return rows.filterNot { it.all { it != null } }
+                .isEmpty()
+    }
+
+    fun getEmptyCells(): List<Cell> {
+        val emptyCells = mutableListOf<Cell>()
+        rows.forEachIndexed { rowIndex, row ->
+            row.forEachIndexed { columnIndex, column ->
+                if (column == null) emptyCells.add(rowIndex to columnIndex)
+            }
+        }
+        return emptyCells
     }
 
     private fun checkRight(rowIndex: Int,
@@ -123,5 +137,7 @@ data class BoardModel(val size: Int,
         return whichLineChecker(cell)
     }
 }
+
+typealias Cell = Pair<Int, Int>
 
 typealias Row = MutableList<Player?>

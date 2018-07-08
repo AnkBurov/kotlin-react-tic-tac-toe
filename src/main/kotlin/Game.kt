@@ -1,5 +1,8 @@
+import algorytm.Minimax
+import kotlinx.coroutines.experimental.launch
 import kotlinx.html.js.onClickFunction
 import model.BoardModel
+import model.GameMode
 import model.Player
 import model.Player.*
 import model.isPlayer
@@ -82,7 +85,10 @@ class Game : RComponent<GameProps, GameState>() {
         val current = state.history.last()
         val currentPlayer = current.nextPlayer
 
-        if (current.board.calculateWinner() != null || current.board.getCell(row, column) != null) {
+        if (current.board.calculateWinner() != null
+                || current.board.getCell(row, column) != null
+                || (props.gameMode == GameMode.HUMAN_VS_AI && currentPlayer == O)) {
+
             return
         }
 
@@ -93,17 +99,40 @@ class Game : RComponent<GameProps, GameState>() {
             val newState = HistoryState(newBoard, currentPlayer.other())
             history += newState
         }
+
+        if (props.gameMode == GameMode.HUMAN_VS_AI) {
+            launchAiPlayerOCoroutine()
+        }
+    }
+
+    private fun launchAiPlayerOCoroutine() {
+        launch {
+            val board = state.history.last().board
+            val aiPlayer = state.history.last().nextPlayer
+
+            val bestMove = Minimax.getBestMove(board, aiPlayer) ?: return@launch
+            val newBoardAi = board.copyOf()
+            newBoardAi.setCell(bestMove.first, bestMove.second, aiPlayer)
+
+            setState {
+                val newState = HistoryState(newBoardAi, aiPlayer.other())
+                history += newState
+            }
+        }
     }
 }
 
-class GameProps(var fieldSize: Int, var victoryLength: Int) : RProps
+class GameProps(var fieldSize: Int,
+                var victoryLength: Int,
+                var gameMode: GameMode) : RProps
 
 class GameState(var history: List<HistoryState>) : RState
 
 class HistoryState(var board: BoardModel,
                    var nextPlayer: Player = X)
 
-fun RBuilder.game(fieldSize: Int, victoryLength: Int) = child(Game::class) {
+fun RBuilder.game(fieldSize: Int, victoryLength: Int, gameMode: GameMode) = child(Game::class) {
     attrs.fieldSize = fieldSize
     attrs.victoryLength = victoryLength
+    attrs.gameMode = gameMode
 }

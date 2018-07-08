@@ -32,6 +32,8 @@ task wrapper(type: Wrapper) {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
     compile "org.jetbrains:kotlin-react-dom:$kotlin_react_version"
+    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core-js', version: '0.23.4'
+
 }
 
 kotlin {
