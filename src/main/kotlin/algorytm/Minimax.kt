@@ -1,5 +1,6 @@
 package algorytm
 
+import kotlinx.coroutines.experimental.async
 import model.BoardModel
 import model.Cell
 import model.Player
@@ -10,16 +11,19 @@ import kotlin.math.min
 
 object Minimax {
 
-    fun getBestMove(board: BoardModel, forPlayer: Player): Cell? {
-        val scoredMoves = board.getEmptyCells()
+    suspend fun getBestMove(board: BoardModel, forPlayer: Player): Cell? {
+        val scoredMoves = board.getEmptyCellsAroundFilledCells()
                 .map { emptyCell ->
-                    val newBoard = board.copyOf()
-                    newBoard.setCell(emptyCell.first, emptyCell.second, forPlayer)
+                    async {
+                        val newBoard = board.copyOf()
+                        newBoard.setCell(emptyCell.first, emptyCell.second, forPlayer)
 
-                    val score = analyzeMove(newBoard, forPlayer, forPlayer.other())
+                        val score = analyzeMove(newBoard, forPlayer, forPlayer.other())
 
-                    emptyCell to score
+                        emptyCell to score
+                    }
                 }
+                .map { it.await() }
                 .sortedBy { it.second }
         val bestScoredMove = scoredMoves.lastOrNull() ?: return null
         //filter out best moves and get random of it
@@ -36,7 +40,7 @@ object Minimax {
         }
 
         var bestVal = if (forPlayer == nextPlayer) Int.MIN_VALUE else Int.MAX_VALUE
-        for ((rowIndex, columnIndex) in board.getEmptyCells()) {
+        for ((rowIndex, columnIndex) in board.getEmptyCellsAroundFilledCells()) {
             board.setCell(rowIndex, columnIndex, nextPlayer)
 
             val moveScore = analyzeMove(board, forPlayer, nextPlayer.other(), depth + 1)

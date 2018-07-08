@@ -44,7 +44,7 @@ class GameRoot : RComponent<RProps, GameRootState>() {
                 +"Field size"
                 attrs.value = 3.toString()
             }
-            for (i in 3..18 step 3) {
+            for (i in 3..18) {
                 option {
                     +i.toString()
                     attrs.value = i.toString()

@@ -66,6 +66,35 @@ data class BoardModel(val size: Int,
         return emptyCells
     }
 
+    fun getEmptyCellsAroundFilledCells(): List<Cell> {
+        val emptyCells = mutableListOf<Cell>()
+        rows.forEachIndexed { rowIndex, row ->
+            row.forEachIndexed { columnIndex, column ->
+                if (column == null) {
+                    // check adjacent cells
+                    if (isAnyAdjacentCellFilled(rowIndex, columnIndex)) emptyCells.add(rowIndex to columnIndex)
+                }
+            }
+        }
+        return emptyCells
+    }
+
+    private fun isAnyAdjacentCellFilled(row: Int, column: Int): Boolean {
+        for (i in -1..1) {
+            for (j in -1..1) {
+                val checkingRow = row + i
+                val checkingColumn = column + j
+
+                if (checkingRow >= 0 && checkingColumn >= 0
+                        && checkingRow <= rows.size - 1 && checkingColumn <= rows[checkingRow].size - 1
+                        && rows[checkingRow][checkingColumn] != null) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
     private fun checkRight(rowIndex: Int,
                            columnIndex: Int,
                            xCounter: Int = 0,
