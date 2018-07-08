@@ -85,7 +85,7 @@ class Game : RComponent<GameProps, GameState>() {
         val current = state.history.last()
         val currentPlayer = current.nextPlayer
 
-        if (current.board.calculateWinner() != null
+        if (current.board.isGameEnded()
                 || current.board.getCell(row, column) != null
                 || (props.gameMode == GameMode.HUMAN_VS_AI && currentPlayer == O)) {
 
@@ -100,7 +100,7 @@ class Game : RComponent<GameProps, GameState>() {
             history += newState
         }
 
-        if (props.gameMode == GameMode.HUMAN_VS_AI) {
+        if (props.gameMode == GameMode.HUMAN_VS_AI && !newBoard.isGameEnded()) {
             launchAiPlayerOCoroutine()
         }
     }

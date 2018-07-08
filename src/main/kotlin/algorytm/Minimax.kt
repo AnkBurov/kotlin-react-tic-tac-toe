@@ -58,8 +58,8 @@ object Minimax {
         val winner = board.calculateWinner()
 
         return when {
-            winner == player -> 10 - depth
-            winner == player.other() -> depth - 10
+            winner == player -> Int.MAX_VALUE - depth
+            winner == player.other() -> depth - Int.MAX_VALUE
             board.isFull() -> 0
             else -> null
         }

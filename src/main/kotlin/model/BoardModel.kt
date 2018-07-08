@@ -39,6 +39,8 @@ data class BoardModel(val size: Int,
         return null
     }
 
+    fun isGameEnded() = calculateWinner() != null
+
     fun copyOf(): BoardModel {
         val newRows = mutableListOf<Row>()
         for (row in rows) {
